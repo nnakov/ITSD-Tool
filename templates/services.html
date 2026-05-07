@@ -1,0 +1,279 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Services
+{% endblock %}
+
+{% block main %}
+<!-- Symbols definition -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+        <symbol id="check-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+        </symbol>
+        <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+        </symbol>
+    </svg>
+
+    <div class="text-center">
+        <h5 class="display-4">
+            Services
+        </h5>
+    </div>
+
+
+    {% block content %}
+
+    {% endblock %}
+
+    <div class="container my-4">
+        <div class="row justify-content-center text-center g-4">
+
+        <!-- Add Row -->
+            <div class="col-3">
+                <form action="/services" method="POST" class="p-3 border rounded">
+                    <h3 class="display-6 mb-3">Add Service</h3>
+
+                    <input name="service_name" class="form-control mb-2" value="{{ data.service_name }}" placeholder="Service Name" type="text">
+                    <input name="src_id" class="form-control mb-2" value="{{ data.src_id }}" placeholder="Service Id" type="number" min="0">
+                    <input name="hours" class="form-control mb-2" value="{{ data.hours }}" placeholder="Working hours" type="number" step="0.1" min="0" max="24">
+                    <input name="min_fte" class="form-control mb-2" value="{{ data.min_fte }}" placeholder="Min FTE" type="number" step="0.1" min="0" max="1000">
+                    <input name="shrinkage" class="form-control mb-2" value="{{ data.shrinkage }}" placeholder="Shrinkage %" type="number" step="0.1" min="0" max="100">
+                    <input name="max_load" class="form-control mb-2" value="{{ data.max_load }}" placeholder="Max Load" type="number" step="0.1" min="0" max="100">
+                    <input name="work_days" class="form-control mb-2" value="{{ data.work_days }}" placeholder="Work Days per Month" type="number" step="0.1" min="0" max="31">
+                    <input name="volume_month" class="form-control mb-2" value="{{ data.volume_month }}" placeholder="Volume per Month" type="number" step="0.1" min="0">
+                    <input name="flat_fte" class="form-control mb-2" value="{{ data.flat_fte }}" placeholder="Flat FTE" type="number" step="0.1" min="0" max="1000">
+
+                    <button class="btn btn-dark w-100" type="submit" name="action" value="add">Add</button>
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% for category, message in messages %}
+
+                            {% if category == "add" %}
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Danger:">
+                                        <use xlink:href="#exclamation-triangle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+
+                            {% if category == "add_success" %}
+                                <div class="alert alert-success mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Success:">
+                                        <use xlink:href="#check-circle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+
+
+                </form>
+            </div>
+
+        <!-- Update Row -->
+            <div class="col-3">
+                <form action="/services" method="POST" class="p-3 border rounded">
+                    <h3 class="display-6 mb-3">Update Service</h3>
+
+                    <select name="selected" class="form-select mb-2" id="updated">
+                        <option disabled selected>Which service</option>
+                        {% for service in services %}
+                            <option value="{{ service.service_name }}">{{ service.service_name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <input name="service_name" class="form-control mb-2" id="service_update" placeholder="Service Name" type="text">
+                    <input name="src_id" class="form-control mb-2" id="src_update" placeholder="Service Id" type="number">
+                    <input name="hours" class="form-control mb-2" id="hours_update" placeholder="Working Hours" type="number" step="0.1" min="0" max="24">
+                    <input name="min_fte" class="form-control mb-2" id="min_fte_update" placeholder="Min FTE" type="number" step="0.1" min="0" max="1000">
+                    <input name="shrinkage" class="form-control mb-2" id="shrinkage_update" placeholder="Shrinkage %" type="number" step="0.1" min="0" max="100">
+                    <input name="max_load" class="form-control mb-2" id="max_load_update" placeholder="Max Load" type="number" step="0.1" min="0" max="100">
+                    <input name="work_days" class="form-control mb-2" id="work_days_update" placeholder="Work Days per Month" type="number" step="0.1" min="0" max="31">
+                    <input name="volume_month" class="form-control mb-2" id="volume_month_update" placeholder="Volume per Month" type="number" step="0.1" min="0">
+                    <input name="flat_fte" class="form-control mb-2" id="flat_fte_update" placeholder="Flat FTE" type="number" step="0.1" min="0" max="1000">
+
+                    <button class="btn btn-dark w-100 mb-3" type="submit" name="action" value="update">Update</button>
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% for category, message in messages %}
+                            {% if category == "update" %}
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Danger:">
+                                        <use xlink:href="#exclamation-triangle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+
+                            {% if category == "update_success" %}
+                                <div class="alert alert-success mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Success:">
+                                        <use xlink:href="#check-circle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+
+                </form>
+            </div>
+        <!-- Delete row -->
+            <div class="col-3">
+                <form id="delete_form" action="/services" method="POST" class="p-3 border rounded">
+                    <h3 class="display-6 mb-3">Delete Service</h3>
+                    <select name="srv_remove" class="form-select mb-2">
+                        <option disabled selected>Which service</option>
+                        {% for service in services %}
+                            <option value="{{ service.id }}">{{ service.service_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="action" id="delete_output">
+                    <button id="ask" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</button>
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% for category, message in messages %}
+                            {% if category == "delete" %}
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Danger:">
+                                        <use xlink:href="#exclamation-triangle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+
+                            {% if category == "delete_success" %}
+                                <div class="alert alert-success mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Success:">
+                                        <use xlink:href="#check-circle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </form>
+            </div>
+
+        <!-- Add Budget -->
+
+            <div class="col-3">
+                <form action="/add_budget" method="POST" class="p-3 border rounded">
+                    <h3 class="display-6 mb-3">Add Budget Record</h3>
+                    <select name="budget_select" class="form-select mb-2">
+                        <option disabled selected>Which service</option>
+                        {% for service in services %}
+                            <option>{{ service.service_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input name="year_select" placeholder="Enter year" autocomplete="off" class="form-control" min="1900" max="2050" type="number">
+                    <input type="hidden" name="action" id="add_output">
+                    <button class="btn btn-dark w-100" type="submit">Add Budget</button>
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% for category, message in messages %}
+                            {% if category == "budget_error" %}
+                                <div class="alert alert-danger mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Danger:">
+                                        <use xlink:href="#exclamation-triangle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+
+                            {% if category == "budget_success" %}
+                                <div class="alert alert-success mt-3" role="alert">
+                                    <svg class="bi me-2 symbol" role="img" aria-label="Success:">
+                                        <use xlink:href="#check-circle-fill" />
+                                    </svg>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </form>
+            </div>
+
+
+
+        </div>
+    </div>
+
+<!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Deletion of Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the service?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirm" class="btn btn-primary">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Listen for changes from services
+        let updated = document.getElementById("updated")
+        updated.addEventListener('change', (event) => {
+
+            const selectedValue = event.target.value;
+
+            fetch('/ajax_row', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    selectedValue: selectedValue
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+
+
+
+                    const service_name_cell = document.getElementById("service_update");
+                    const src_id_cell = document.getElementById("src_update");
+                    const hours_cell = document.getElementById("hours_update");
+                    const min_fte_cell = document.getElementById("min_fte_update");
+                    const shrinkage_cell = document.getElementById("shrinkage_update");
+                    const max_load_cell = document.getElementById("max_load_update");
+                    const work_days_cell = document.getElementById("work_days_update");
+                    const volume_month_cell = document.getElementById("volume_month_update");
+                    const flat_fte_cell = document.getElementById("flat_fte_update");
+
+                    src_id_cell.value = data[0]["src_id"];
+                    service_name_cell.value = data[0]["service_name"];
+                    hours_cell.value = data[0]["hours"];
+                    min_fte_cell.value = data[0]["min_fte"];
+                    shrinkage_cell.value = data[0]["shrinkage"] * 100;
+                    max_load_cell.value = data[0]["max_load"];
+                    work_days_cell.value = data[0]["work_days"];
+                    volume_month_cell.value = data[0]["volume_month"];
+                    flat_fte_cell.value = data[0]["flat_fte"];
+                })
+        })
+
+    // Confirmation Button
+        let ask = document.getElementById("ask");
+
+        ask.addEventListener('click', (event) => {
+            event.preventDefault();
+
+        });
+
+        document.getElementById("confirm").addEventListener("click", () => {
+            document.getElementById("delete_output").value = "delete";
+            document.getElementById("delete_form").submit();
+        });
+    </script>
+
+
+
+{% endblock %}
