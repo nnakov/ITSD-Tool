@@ -1,0 +1,181 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    FTE Calculation
+{% endblock %}
+
+
+
+{% block main %}
+    <h5 class="display-4 p-3 text-center">FTE Calculation</h5>
+    <div class="container border rounded justify-content-center text-center">
+
+        <div class="text-center mb-2">
+            <select name=sel_service class="form-select d-inline-block w-auto">
+                <option disabled selected>Select a service</option>
+                {% for service in services %}
+                    <option> {{ service.service_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row justify-content-center text-center">
+
+            <div class="col-md-8">
+
+                <table class="table table-hover w-auto mx-auto">
+                    <thead>
+                        <tr>
+                            <th colspan="3" class="text-center">
+
+                            </th>
+                        </tr>
+                        <tr>
+                            <td class="fs-4 fw-bold"> Parameters </td>
+                            <td class="fs-4 fw-bold"> Actual </td>
+                            <td class="fs-4 fw-bold"> Forecast </td>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td> FTE</td>
+                            <td class="fte_data table-active"></td>
+                            <td id="forecast_result" class="forecast"></td>
+                        </tr>
+                        {% for row in service_rows %}
+                            <tr>
+                                <td>{{ row }}</td>
+                                <td class="live_data table-active"></td>
+                                <td class="forecast_cell"><input type="number" min="0" class="input_data form-control text-center" placeholder="{{ row }}" data-field="{{ row }}"></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        let hours = 0,
+            min_fte = 0,
+            shrink = 0,
+            max_load = 0,
+            work_days = 0,
+            volume = 0,
+            flat_fte = 0;
+
+    // Recalculate forecast by changes
+
+        function calculateFTE() {
+            let fte = 0;
+
+            if (hours === 0) {
+                if (work_days > 0 && max_load > 0) {
+                    fte = volume / (work_days * max_load);
+                }
+            } else {
+                if (flat_fte < min_fte) {
+                    fte = min_fte;
+                } else {
+                    fte = flat_fte * (1 + shrink);
+                }
+            }
+
+            document.querySelector('.forecast').textContent = !isNaN(fte) && isFinite(fte) ? fte.toFixed(1) : "";
+        }
+
+        function check(value) {
+            value = parseFloat(value);
+
+            if (!isNaN(value) && value >= 0) {
+                return value;
+            } else {
+                return 0;
+            }
+        }
+    // Listeners for all input fields
+        document.querySelectorAll('.input_data').forEach(input => {
+            input.addEventListener('input', () => {
+
+                let value = check(input.value);
+
+                const field = input.dataset.field.toLowerCase();
+
+                switch (field) {
+                    case "working hours":
+                        hours = value;
+                        break;
+                    case "min fte":
+                        min_fte = value;
+                        break;
+                    case "shrinkage %":
+                        shrink = value / 100;
+                        break;
+                    case "max load":
+                        max_load = value;
+                        break;
+                    case "work days":
+                        work_days = value;
+                        break;
+                    case "volume per month":
+                        volume = value;
+                        break;
+                    case "flat fte":
+                        flat_fte = value;
+                        break;
+                }
+
+                calculateFTE();
+            });
+        });
+
+    // Service selection
+
+        const selectedElement = document.querySelector('select[name="sel_service"]');
+
+        selectedElement.addEventListener('change', (event) => {
+            const selectedValue = event.target.value;
+
+        // Reset Fields
+            hours = 0, min_fte = 0, shrink = 0, max_load = 0, work_days = 0, volume = 0, flat_fte = 0;
+
+            document.querySelectorAll('.input_data').forEach(i => i.value = "");
+            document.querySelector('.forecast').textContent = "";
+            document.querySelector('.fte_data').textContent = "";
+
+
+            fetch('/fte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    selectedValue: selectedValue
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+
+                // Update the page with the filtered results
+                    const live_cells = document.querySelectorAll('.live_data');
+                    live_cells.forEach((c, i) => c.textContent = data.selected_data[i]);
+
+                    document.querySelector('.fte_data').textContent = data.result;
+                    const input_cells = document.querySelectorAll('.input_data');
+                    input_cells.forEach((c, i) => c.value = data.selected_data[i]);
+
+                // auto-fill local variables
+                    hours = data.selected_data[0];
+                    min_fte = data.selected_data[1];
+                    shrink = data.selected_data[2] / 100;
+                    max_load = data.selected_data[3];
+                    work_days = data.selected_data[4];
+                    volume = data.selected_data[5];
+                    flat_fte = data.selected_data[6];
+
+                    calculateFTE();
+                });
+        });
+    </script>
+{% endblock %}
