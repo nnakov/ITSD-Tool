@@ -1,6 +1,5 @@
 # ITSD Tool
-### CS50 Codespace hosting: https://jubilant-space-meme-67rvp5v96xwf5j5g-5000.app.github.dev/login
-#### Video Demo: https://www.youtube.com/watch?v=4oxOPKukY-M
+
 
 
 ## Overview
