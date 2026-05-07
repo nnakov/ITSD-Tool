@@ -1,0 +1,74 @@
+{% set current = request.path %}
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <!-- Including CSS -->
+        <link rel="stylesheet" type="text/css" href="static/styles.css">
+        <!-- Including Bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <title> ITSD: {% block title%}{% endblock%}</title>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="/">ITSD</a>
+            {% if user_logged %}
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link {% if current == '/services' %}active{% endif %}" href="/services">
+                                Add/Update Data
+                                {% if current == '/services' %}<span class="sr-only">(current)</span>{% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link {% if current == '/fte' %}active{% endif %}" href="/fte">
+                                FTE Calculation {% if current == '/fte' %}<span class="sr-only">(current)</span>{% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link {% if current == '/budget' %}active{% endif %}" href="/budget">
+                                Budget Calculation
+                                {% if current == '/budget' %}
+                                    <span class="sr-only">(current)</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item d-flex">
+                            <span class="navbar-text me-3">Hello, {{ username }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
+                    </ul>
+
+                </div>
+
+            {% endif %}
+        </nav>
+
+        <footer>
+            <ul>
+                <ui>2025 ITSD ®</ui>
+            </ul>
+        </footer>
+        {% block main %}{% endblock %}
+
+    </body>
+
+</html>
