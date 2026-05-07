@@ -1,0 +1,362 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Budget Calculation
+{% endblock %}
+
+{% block main %}
+
+<!-- Include symbols for error and confim messages-->
+    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+        <symbol id="check-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+        </symbol>
+        <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+        </symbol>
+    </svg>
+
+    <h5 class="display-5 text-center mb-3 mt-3">Budget Calculation</h5>
+
+    <form action="/budget" method="POST">
+
+        <table class="budget_table table-bordered table table-light table-hover text-center align-middle w-100 p-3">
+            <thead>
+                <tr>
+                    <td colspan="2" class="w-auto pr-1">
+                        <select name=service class="form-select" id="selected">
+                            <option disabled selected>Select Service</option>
+                            {% for service in services %}
+                                <option value="{{ service.service_name }}">{{ service.service_name }}</option>
+                            {% endfor %}
+
+                        </select>
+                    </td>
+                    <td colspan="2" class="w-auto mx-auto">
+                        <select name=year class="form-select" id="selected_year">
+                            <option disabled selected value="default_year">Select Year</option>
+
+                        </select>
+                    </td>
+                    <td colspan="11"></td>
+                </tr>
+                <tr class="text-center">
+                    <th> Service </th>
+                    {% for month in months %}
+                        <th>
+                            {{ month }}
+                        </th>
+                    {% endfor %}
+                    <th> Avg Cost per Month </th>
+                    <th> Cost per Year</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+
+                <tr>
+                    <td> FTE</td>
+                    {% for month in months %}
+                        <td class="fte_data">
+                            <input class="form-control text-center" type="number" autocomplete="off" name="fte_{{ month }}" min="0" max="500" step="0.01">
+                        </td>
+                    {% endfor %}
+                    <td rowspan="3" class="table-primary fw-bold" id="average"></td>
+                    <td rowspan="3" class="table-primary fw-bold" id="year"></td>
+                </tr>
+                <tr>
+                    <td> Cost per FTE </td>
+                    {% for month in months %}
+                        <td class="cost_data">
+                            <input class="form-control text-center" type="number" autocomplete="off" name="fte_cost{{ month }}" min="0" max="20000" step="0.1">
+                        </td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td>Total cost</td>
+                    {% for month in months %}
+                        <td class="total_cost table-primary fw-bold"> </td>
+                    {% endfor %}
+                </tr>
+
+            </tbody>
+        </table>
+
+        <button class="btn btn-dark w-auto text-center" type="submit">Save Budget</button>
+
+
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% for category, message in messages %}
+                {% if category == "error" %}
+                    <div class="alert alert-danger mt-3 text-center" style="margin: 0 auto; max-width: 500px;" role="alert">
+                        <svg class="bi me-2 symbol" role="img" aria-label="Danger:">
+                            <use xlink:href="#exclamation-triangle-fill" />
+                        </svg>
+                        {{ message }}
+                    </div>
+                {% endif %}
+
+                {% if category == "confirm" %}
+                    <div class="alert alert-success mt-3 text-center" style="margin: 0 auto; max-width: 500px;" role="alert">
+                        <svg class="bi me-2 symbol" role="img" aria-label="Success:">
+                            <use xlink:href="#check-circle-fill" />
+                        </svg>
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+    </form>
+
+
+
+    <script>
+    // Convert blank fields to 0 before submitting the form
+        document.querySelector("form").addEventListener("submit", () => {
+            document.querySelectorAll(".form-control").forEach(input => {
+                let number = parseFloat(input.value);
+
+                if (isNaN(number)) {
+                    input.value = 0; // blank becomes 0
+                } else {
+                    input.value = number;
+                }
+            });
+        });
+        let select = document.getElementById("selected")
+        let select_year = document.getElementById("selected_year")
+        let selectedService = null;
+        let selectedYear = null;
+
+        select.addEventListener('change', (event) => {
+
+            select_year.innerHTML = "";
+            let option = document.createElement("option");
+            option.text = "Select Year";
+            option.disabled = true;
+            option.selected = true;
+            select_year.appendChild(option);
+
+            selectedService = event.target.value;
+
+        // Empty current fields
+            const fte_cell = document.querySelectorAll('.fte_data');
+            const cost_cell = document.querySelectorAll('.cost_data');
+            const total_cell = document.querySelectorAll('.total_cost');
+            const average_cell = document.getElementById("average");
+            const year_cell = document.getElementById("year");
+
+            fte_cell.forEach(cell => {
+                let input = cell.querySelector("input");
+                if (input) input.value = "";
+            });
+
+            cost_cell.forEach(cell => {
+                let input = cell.querySelector("input");
+                if (input) input.value = "";
+            });
+
+            total_cell.forEach(cell => {
+                cell.textContent = ""
+            });
+            average_cell.textContent = "";
+            year_cell.textContent = "";
+
+            fetch('/ajax_service', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    selectedService: selectedService
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+
+                    data.forEach(item => {
+                        let option = document.createElement("option");
+
+                        option.value = item["year"];
+                        option.text = item["year"];
+                        selected_year.appendChild(option);
+
+                    })
+
+                })
+
+        });
+
+        select_year.addEventListener('change', (event) => {
+
+            selectedYear = event.target.value;
+            checkAndSend();
+
+        });
+
+        function checkAndSend() {
+            if (selectedService && selectedYear) {
+
+
+                fetch('/ajax_fill', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        selectedService: selectedService,
+                        selectedYear: selectedYear
+                    }),
+                })
+
+                    .then(response => response.json())
+                    .then(data => {
+
+
+                        const fte_cell = document.querySelectorAll('.fte_data');
+                        const cost_cell = document.querySelectorAll('.cost_data');
+                        const total_cell = document.querySelectorAll('.total_cost');
+                        const average_cell = document.getElementById("average");
+                        const year_cell = document.getElementById("year");
+
+                        let numerator = 0,
+                            denominator = 0,
+                            year = 0,
+                            counter = 0;
+
+                        fte_cell.forEach(cell => {
+                            let input = cell.querySelector("input");
+                            if (input) input.value = "";
+                        });
+                        cost_cell.forEach(cell => {
+                            let input = cell.querySelector("input");
+                            if (input) input.value = "";
+                        });
+
+                        total_cell.forEach(cell => {
+                            cell.textContent = ""
+                        });
+                        average_cell.textContent = "";
+                        year_cell.textContent = "";
+
+                        data.forEach((item, i) => {
+
+                            let input = fte_cell[i].querySelector("input");
+                            let input_cost = cost_cell[i].querySelector("input");
+
+
+                            if (input) {
+                                if (item.fte_value != 0) {
+                                    input.value = item.fte_value;
+                                }
+
+                            }
+                            if (input_cost) {
+                                if (item.fte_cost != 0) {
+                                    input_cost.value = item.fte_cost;
+                                }
+
+                            }
+                            let total = (item.fte_value * item.fte_cost).toFixed(2);
+
+                            if (total_cell[i]) {
+                                numerator += parseFloat(total);
+                                if (total > 0) {
+                                    total_cell[i].textContent = total;
+                                    denominator += 1;
+                                }
+
+                            }
+
+
+                        });
+
+                        if (average_cell) {
+                            average_cell.textContent = (numerator / denominator).toFixed(2);
+
+                        }
+
+                        if (year_cell) {
+                            year_cell.textContent = numerator.toFixed(2);
+                            year = numerator.toFixed(2);
+                        }
+
+
+                    // Function definitions
+                        function convertNumber(value) {
+                            if (value === "" || value === "." || /^[0-9]+\.$/.test(value)) {
+                                return value;
+                            }
+
+                            let number = parseFloat(value);
+
+                            if (isNaN(number) || number < 0) {
+                                return 0;
+                            }
+
+                            return number;
+                        }
+
+
+                        function updateRowTotal(rowIndex) {
+                            let fteInput = document.querySelectorAll('.fte_data input')[rowIndex];
+                            let costInput = document.querySelectorAll('.cost_data input')[rowIndex];
+                            let totalCell = document.querySelectorAll('.total_cost')[rowIndex];
+
+                            fteInput.value = convertNumber(fteInput.value);
+                            costInput.value = convertNumber(costInput.value);
+
+                            let fte = convertNumber(fteInput.value);
+                            let cost = convertNumber(costInput.value);
+                            if (isNaN(fte) || isNaN(cost)) {
+                                totalCell.textContent = "";
+                            } else {
+                                totalCell.textContent = (fte * cost).toFixed(2);
+                            }
+                            updateTotals(); // function: update average + yearly
+
+                        }
+
+                        function updateTotals() {
+                            let totals = document.querySelectorAll('.total_cost');
+                            let sum = 0;
+                            let count = 0;
+
+                            totals.forEach(cell => {
+                                let val = parseFloat(cell.textContent);
+
+                                if (!isNaN(val) && val > 0) {
+                                    sum += val;
+                                    count++;
+                                }
+                            });
+
+                            let average = count > 0 ? (sum / count).toFixed(2) : 0;
+
+                            document.getElementById("year").textContent = sum.toFixed(2);
+                            document.getElementById("average").textContent = average;
+                        }
+
+
+                        fte_cell.forEach((cell, rowIndex) => {
+                            let fteInput = cell.querySelector("input");
+                            let costInput = cost_cell[rowIndex].querySelector("input");
+
+
+
+                        // Remove old listeners first
+                            fteInput.oninput = null;
+                            costInput.oninput = null;
+
+                        // Add new listeners
+                            fteInput.addEventListener('input', () => updateRowTotal(rowIndex));
+                            costInput.addEventListener('input', () => updateRowTotal(rowIndex))
+                        });
+
+                    });
+            }
+        }
+    </script>
+
+{% endblock %}
