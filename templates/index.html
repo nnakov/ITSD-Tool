@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Main Menu
+
+{% endblock %}
+
+
+{% block main %}
+
+    {% block content %}
+        <div class="d-flex justify-content-around align-items-center text-center" style="height: 80vh;">
+            <div class="d-flex flex-column align-items-center px-5">
+                <img id="service" src="/static/services.jpg" class="img-thumbnail" alt="services" style="width:150px;">
+                <p class="m-0 fw-bold">Add/Edit Service</p>
+            </div>
+            <div class="d-flex flex-column align-items-center px-5">
+                <img id="fte" src="/static/fte.jpg" class="img-thumbnail" alt="fte" style="width:150px;">
+                <p class="m-0 fw-bold flex-grow-1">Calculate FTE </p>
+            </div>
+            <div class="d-flex flex-column align-items-center px-5">
+                <img id="budget" src="/static/budget.jpg" class="img-thumbnail" alt="budget" style="width:150px;">
+                <p class="m-0 fw-bold">Calculate Budget</p>
+            </div>
+
+        </div>
+    {% endblock %}
+
+    <script>
+        let service = document.getElementById("service");
+        service.addEventListener("click", () => {
+            window.location.href = "services";
+        });
+
+        let fte = document.getElementById("fte");
+        fte.addEventListener("click", () => {
+            window.location.href = "fte";
+        });
+
+        let budget = document.getElementById("budget");
+        budget.addEventListener("click", () => {
+            window.location.href = "budget";
+        });
+    </script>
+{% endblock %}
