@@ -1,0 +1,76 @@
+footer {
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.login_buttons {
+    justify-content: center;
+    align-items: center;
+}
+
+img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    background-color: black;
+    color: white;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.symbol {
+    width: 30px;
+    height: 30px;
+}
+
+
+td.live_data,
+td.fte_data {
+    white-space: nowrap;
+    width: 1%;
+    text-align: center;
+}
+
+.forecast_cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50%;
+
+}
+
+#forecast_result {
+    font-weight: bold;
+    color: white;
+    background-color: black;
+}
+
+td {
+    vertical-align: middle !important;
+    text-align: center;
+}
+
+td input {
+    margin: 0 auto;
+    width: 80px;
+}
+
+thead th {
+    width: calc(100% / 5);
+    /* 5 headers */
+}
+
+.budget_table {
+    table-layout: fixed;
+}
+
+.budget_table th,
+td {
+    vertical-align: middle !important;
+}
+
+.budget_table .table-active {
+    background-color: blue !important;
+}
